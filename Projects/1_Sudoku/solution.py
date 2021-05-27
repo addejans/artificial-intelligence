@@ -8,7 +8,8 @@ square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','45
 unitlist = row_units + column_units + square_units
 
 # TODO: Update the unit list to add the new diagonal units
-unitlist = unitlist
+diagonal_units = [[rows[i]+cols[i] for i in range(9)],[rows[i]+cols[8-i] for i in range(9)]]
+unitlist = unitlist + diagonal_units
 
 
 # Must be called after all units (including diagonals) are added to the unitlist
@@ -17,9 +18,9 @@ peers = extract_peers(units, boxes)
 
 
 def naked_twins(values):
-    """Eliminate values using the naked twins strategy.
+    """Eliminate    values using the naked twins strategy.
 
-    The naked twins strategy says that if you have two or more unallocated boxes
+     naked twins strategy says that if you have two or more unallocated boxes
     in a unit and there are only two digits that can go in those two boxes, then
     those two digits can be eliminated from the possible assignments of all other
     boxes in the same unit.
@@ -54,7 +55,41 @@ def naked_twins(values):
     https://github.com/udacity/artificial-intelligence/blob/master/Projects/1_Sudoku/pseudocode.md
     """
     # TODO: Implement this function!
-    raise NotImplementedError
+    '''
+    #PSEUDO CODE:
+     out <- copy(values) /* make a deep copy */
+     for each boxA in values do
+      for each boxB of PEERS(boxA) do
+       if both values[boxA] and values[boxB] exactly match and have only two feasible digits do
+        for each peer of INTERSECTION(PEERS(boxA), PEERS(boxB)) do
+         for each digit of values[boxA] do
+          remove digit d from out[peer]
+     return out
+    '''
+    #TODO: Why doesn't this implementation work?
+    # Collect boxes with 2 entries
+    boxes_size_2 = [box for box in values.keys() if len(values[box]) == 2]
+    # Collect sets of naked twins from all 2 entry boxes
+    naked_twins = [[boxA, boxB] for boxA in boxes_size_2 for boxB in peers[boxA] if set(values[boxA]) == set(values[boxB])]
+    for twin in naked_twins:
+        # Find peers of both the naked twins
+        intersecting_peers = list(set(peers[twin[0]]) & set(peers[twin[1]]))
+        # Remove twin values from interesecting peers since these cannot be part of the feasible solution
+        for peer in intersecting_peers:
+            for digit in values[twin[0]]:
+                values[peer] = values[peer].replace(digit,'')
+    return values
+
+#     out_values = values.copy()
+#     for box in boxes:
+#         for peer in peers[box]:
+#             if (values[box] == values[peer]) and (len(values[box]) == 2):
+#                 for peer_unit in peers[peer]:
+#                     if peer_unit in peers[box]:
+#                         for c in list(values[box]):
+#                             out_values[peer_unit] = out_values[peer_unit].replace(c, '')
+#     return out_values
+
 
 
 def eliminate(values):
@@ -74,7 +109,12 @@ def eliminate(values):
         The values dictionary with the assigned values eliminated from peers
     """
     # TODO: Copy your code from the classroom to complete this function
-    raise NotImplementedError
+    solved_values = [box for box in values.keys() if len(values[box]) == 1]
+    for box in solved_values:
+        digit = values[box]
+        for peer in peers[box]:
+            values[peer] = values[peer].replace(digit,'')
+    return values
 
 
 def only_choice(values):
@@ -98,7 +138,12 @@ def only_choice(values):
     You should be able to complete this function by copying your code from the classroom
     """
     # TODO: Copy your code from the classroom to complete this function
-    raise NotImplementedError
+    for unit in unitlist:
+        for digit in '123456789':
+            dplaces = [box for box in unit if digit in values[box]]
+            if len(dplaces) == 1:
+                values[dplaces[0]] = digit
+    return values
 
 
 def reduce_puzzle(values):
@@ -116,8 +161,24 @@ def reduce_puzzle(values):
         no longer produces any changes, or False if the puzzle is unsolvable 
     """
     # TODO: Copy your code from the classroom and modify it to complete this function
-    raise NotImplementedError
-
+    stalled = False
+    while not stalled:
+        # Check how many boxes have a determined value
+        solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
+        # Use the Eliminate Strategy
+        values = eliminate(values)
+        # Use the Only Choice Strategy
+        values = only_choice(values)
+        # Use the Naked Twins Strategy
+        values = naked_twins(values)
+        # Check how many boxes have a determined value, to compare
+        solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
+        # If no new values were added, stop the loop.
+        stalled = solved_values_before == solved_values_after
+        # Sanity check, return False if there is a box with zero available values:
+        if len([box for box in values.keys() if len(values[box]) == 0]):
+            return False
+    return values
 
 def search(values):
     """Apply depth first search to solve Sudoku puzzles in order to solve puzzles
@@ -139,7 +200,22 @@ def search(values):
     and extending it to call the naked twins strategy.
     """
     # TODO: Copy your code from the classroom to complete this function
-    raise NotImplementedError
+    "Using depth-first search and propagation, try all possible values."
+    # First, reduce the puzzle using the previous function
+    values = reduce_puzzle(values)
+    if values is False:
+        return False ## Failed earlier
+    if all(len(values[s]) == 1 for s in boxes): 
+        return values ## Solved!
+    # Choose one of the unfilled squares with the fewest possibilities
+    n,s = min((len(values[s]), s) for s in boxes if len(values[s]) > 1)
+    # Now use recurrence to solve each one of the resulting sudokus, and 
+    for value in values[s]:
+        new_sudoku = values.copy()
+        new_sudoku[s] = value
+        attempt = search(new_sudoku)
+        if attempt:
+            return attempt
 
 
 def solve(grid):
