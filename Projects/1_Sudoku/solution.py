@@ -66,7 +66,16 @@ def naked_twins(values):
           remove digit d from out[peer]
      return out
     '''
-    #TODO: Why doesn't this implementation work?
+#     out_values = values.copy()
+#     for box in boxes:
+#         for peer in peers[box]:
+#             if (values[box] == values[peer]) and (len(values[box]) == 2):
+#                 for peer_unit in peers[peer]:
+#                     if peer_unit in peers[box]:
+#                         for c in list(values[box]):
+#                             out_values[peer_unit] = out_values[peer_unit].replace(c, '')
+#     return out_values
+
     # Collect boxes with 2 entries
     boxes_size_2 = [box for box in values.keys() if len(values[box]) == 2]
     # Collect sets of naked twins from all 2 entry boxes
@@ -80,15 +89,7 @@ def naked_twins(values):
                 values[peer] = values[peer].replace(digit,'')
     return values
 
-#     out_values = values.copy()
-#     for box in boxes:
-#         for peer in peers[box]:
-#             if (values[box] == values[peer]) and (len(values[box]) == 2):
-#                 for peer_unit in peers[peer]:
-#                     if peer_unit in peers[box]:
-#                         for c in list(values[box]):
-#                             out_values[peer_unit] = out_values[peer_unit].replace(c, '')
-#     return out_values
+
 
 
 
