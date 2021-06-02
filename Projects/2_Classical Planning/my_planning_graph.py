@@ -131,6 +131,31 @@ class PlanningGraph:
         layer.update_mutexes()
         self.literal_layers = [layer]
         self.action_layers = []
+        
+    def levelcost(self):
+        cost = {}
+        satisfied = {}
+        # initialize all goals to False
+        for goal in self.goal:
+            cost[goal] = 0
+            satisfied[goal] = False
+        # find which layer each goal becomes satisfied
+        # stop when planning graph levels
+        while not self._is_leveled:
+            literal_layer = self.literal_layers[-1]
+            for goal in self.goal:
+                for state in literal_layer:
+                    # if state is a goal then that state satisfies goal criteria
+                    if state == goal:
+                        if not satisfied[goal]:
+                            satisfied[goal] = True
+                if not satisfied[goal]:
+                    cost[goal] += 1
+            no_goals_left = not (False in satisfied.values())
+            if no_goals_left:
+                break
+            self._extend()
+        return cost
 
     def h_levelsum(self):
         """ Calculate the level sum heuristic for the planning graph
@@ -158,7 +183,13 @@ class PlanningGraph:
         Russell-Norvig 10.3.1 (3rd Edition)
         """
         # TODO: implement this function
-        raise NotImplementedError
+        
+        cost = self.levelcost()
+        level_sum = 0
+        # sum cost at each level
+        for cost in cost.values():
+            level_sum += cost
+        return level_sum
 
     def h_maxlevel(self):
         """ Calculate the max level heuristic for the planning graph
@@ -188,7 +219,11 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic with A*
         """
         # TODO: implement maxlevel heuristic
-        raise NotImplementedError
+        
+        cost = self.levelcost()
+        max_level = 0
+        # find max cost of all levels
+        return max(cost.values())
 
     def h_setlevel(self):
         """ Calculate the set level heuristic for the planning graph
@@ -213,7 +248,37 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic on complex problems
         """
         # TODO: implement setlevel heuristic
-        raise NotImplementedError
+       
+        cost = {}
+        satisfied = {}
+        for goal in self.goal:
+            cost[goal] = 0
+            satisfied[goal] = False
+        idx = 0
+        while not self._is_leveled:
+            literal_layer = self.literal_layers[-1]
+            for goal in self.goal:
+                for state in literal_layer:
+                    if state == goal:
+                        if not satisfied[goal]:
+                            satisfied[goal] = True
+                if not satisfied[goal]:
+                    cost[goal] += 1
+            no_goals_left = not (False in satisfied.values())
+            if no_goals_left == False:
+                self._extend()
+                idx += 1
+                continue
+            goals_are_mutex = False
+            for goalA in self.goal:
+                for goalB in self.goal:
+                    if literal_layer.is_mutex(goalA, goalB):
+                        goals_are_mutex = True
+            if goals_are_mutex == False:
+                return idx
+            else:
+                self._extend()
+                idx += 1
 
     ##############################################################################
     #                     DO NOT MODIFY CODE BELOW THIS LINE                     #
