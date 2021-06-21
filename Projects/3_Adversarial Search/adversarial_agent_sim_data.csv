@@ -1,0 +1,32 @@
+timeout (ms),num_rounds,num_games,matches_won,technique,opponent
+150,50,100,55.00%,minimax with depth = 4,minimax
+150,200,400,57.50%,minimax with depth = 4,minimax
+150,NULL,NULL,NULL,minimax with depth = 5,minimax
+150,50,100,64.00%,alphabeta with depth = 4,minimax
+150,200,400,59.50%,alphabeta with depth = 4,minimax
+150,NULL,NULL,NULL,alphabeta with depth = 5,minimax
+150,50,100,60.00%,iterative deep alphabeta with depth = 4,minimax
+150,100,200,62.50%,iterative deep alphabeta with depth = 4,minimax
+150,50,100,,iterative deep alphabeta with depth = 5,minimax
+150,100,200,62.00%,iterative deep alphabeta with depth = 5,minimax
+150,50,100,,iterative deep alphabeta with depth = 6,minimax
+150,100,200,,iterative deep alphabeta with depth = 6,minimax
+150,50,100,,iterative deep alphabeta with depth = 7,minimax
+150,100,200,77.00%,iterative deep alphabeta with depth = 7,minimax
+150,50,100,,iterative deep alphabeta with depth = 8,minimax
+150,100,200,,iterative deep alphabeta with depth = 8,minimax
+150,50,100,,iterative deep alphabeta with depth = 9,minimax
+150,100,200,,iterative deep alphabeta with depth = 9,minimax
+150,50,100,,iterative deep alphabeta with depth = 10,minimax
+150,100,200,,iterative deep alphabeta with depth = 10,minimax
+150,100,200,75.00%,iterative deep alphabeta with depth = 20,minimax
+150,50,100,,iterative deep alphabeta with depth = 10000,minimax
+150,50,100,7.00%,MCTS with 50 simulations,minimax
+150,50,100,12.00%,MCTS with 50 simulations,greedy
+150,50,100,52.00%,MCTS with 50 simulations,random
+300,50,100,48.00%,MCTS with 100 simulations,random
+600,50,100,54.00%,MCTS with 200 simulations,random
+1200,50,100,49.00%,MCTS with 400 simulations,random
+2400,5,10,xx,MCTS with 800 simulations,random
+4800,10,20,65.00%,MCTS with 1600 simulations,random
+9600,10,20,75.00%,MCTS with 3200 simulations,random
