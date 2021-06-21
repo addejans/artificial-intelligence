@@ -53,8 +53,8 @@ class CustomPlayer(DataPlayer):
 #             self.queue.put(random.choice(state.actions()))
 #             self.queue.put(self.minimax(state, depth=4))
 #             self.queue.put(self.alphabeta(state, depth=4))
-#             self.iterative_deep_ab(state, depth_limit=10000) # we don't need a depth limit since the time-out will stop us early
-            self.mcts_search(state)
+            self.iterative_deep_ab(state, depth_limit=4) # we don't need a depth limit since the time-out will stop us early
+#             self.mcts_search(state)
     
     
     
@@ -178,7 +178,8 @@ class CustomPlayer(DataPlayer):
     def alphabeta(self, state, depth):
         
         def min_value(state, depth, alpha, beta):
-            if state.terminal_test(): return state.utility(self.player_id)
+            if state.terminal_test(): 
+                return state.utility(self.player_id)
             if depth <= 0: return self.score(state)
             value = float("inf")
             for action in state.actions():
@@ -199,16 +200,16 @@ class CustomPlayer(DataPlayer):
                     return value
                 alpha = max(alpha, value)
             return value
-        
+
         alpha = float("-inf")
         beta = float("inf")
         best_score = float("-inf")
         best_move = None
         for action in state.actions():
-            v = min_value(state.result(action), depth, alpha, beta)
-            alpha = max(alpha, v)
-            if v > best_score:
-                best_score = v
+            value = min_value(state.result(action), depth - 1, alpha, beta)
+            alpha = max(alpha, value)
+            if value >= best_score:
+                best_score = value
                 best_move = action
         return best_move
         
